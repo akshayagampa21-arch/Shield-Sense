@@ -1,0 +1,1161 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShieldSense - Simple & Smart Link Checker</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+/* DARK THEME */
+:root {
+    --bg-color: #050914;
+    --card-bg: rgba(10, 18, 36, 0.65);
+    --text-color: #ffffff;
+    --text-muted: #c3d4ec;
+    --accent-color: #00e5ff;
+    --nav-bg: rgba(5, 9, 20, 0.75);
+    --border-color: rgba(0, 229, 255, 0.25);
+    --dashboard-bg: rgba(8, 15, 30, 0.75);
+    --hero-overlay: linear-gradient(135deg, rgba(5, 9, 20, 0.65), rgba(5, 9, 20, 0.45));
+    --section-overlay-1: linear-gradient(180deg, rgba(5, 9, 20, 0.6), rgba(5, 9, 20, 0.5));
+    --section-overlay-2: linear-gradient(135deg, rgba(5, 9, 20, 0.65), rgba(5, 9, 20, 0.45));
+    --input-bg: rgba(0, 0, 0, 0.5);
+    --particle-color: rgba(0, 229, 255, 0.4);
+    --particle-line: rgba(0, 229, 255, 0.15);
+}
+
+/* LIGHT THEME */
+[data-theme="light"] {
+    --bg-color: #f8fafc;
+    --card-bg: rgba(255, 255, 255, 0.88);
+    --text-color: #0f172a;
+    --text-muted: #334155;
+    --accent-color: #0284c7;
+    --nav-bg: rgba(248, 250, 252, 0.9);
+    --border-color: rgba(2, 132, 199, 0.25);
+    --dashboard-bg: rgba(255, 255, 255, 0.92);
+    --hero-overlay: linear-gradient(135deg, rgba(248, 250, 252, 0.85), rgba(248, 250, 252, 0.65));
+    --section-overlay-1: linear-gradient(180deg, rgba(248, 250, 252, 0.88), rgba(248, 250, 252, 0.75));
+    --section-overlay-2: linear-gradient(135deg, rgba(248, 250, 252, 0.9), rgba(248, 250, 252, 0.72));
+    --input-bg: rgba(241, 245, 249, 0.95);
+    --particle-color: rgba(2, 132, 199, 0.35);
+    --particle-line: rgba(2, 132, 199, 0.12);
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+html{ scroll-behavior:smooth; }
+
+body{
+    font-family:'Inter', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    overflow-x: hidden;
+    position: relative;
+}
+
+#particles-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    z-index: 2;
+    pointer-events: none;
+}
+
+nav{
+    position:fixed;
+    top:0; width:100%;
+    z-index:100;
+    padding:18px 7%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background: var(--nav-bg);
+    backdrop-filter:blur(15px);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.logo{
+    font-size:24px;
+    font-weight:800;
+    color: var(--accent-color);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+nav a{
+    color: var(--text-color);
+    text-decoration:none;
+    font-size:14px;
+    font-weight: 600;
+}
+
+nav a:hover{ color: var(--accent-color); }
+
+.theme-toggle-btn {
+    background: var(--dashboard-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    padding: 8px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.auth-btn-group { display: flex; gap: 10px; }
+
+.btn-sm {
+    padding: 8px 16px;
+    font-size: 13px;
+    border-radius: 8px;
+}
+
+.profile-container {
+    position: relative;
+    display: none;
+}
+
+.profile-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: url('https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80') center/cover;
+    border: 2px solid var(--accent-color);
+    cursor: pointer;
+}
+
+.dropdown-menu {
+    position: absolute;
+    right: 0; top: 50px;
+    background: var(--dashboard-bg);
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(20px);
+    border-radius: 12px;
+    width: 220px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 101;
+}
+
+.dropdown-menu.active { display: flex; }
+
+.dropdown-header {
+    padding: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.dropdown-header p { font-size: 14px; font-weight: 700; }
+.dropdown-header span { font-size: 12px; color: var(--text-muted); }
+
+.dropdown-menu a {
+    padding: 12px 15px;
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dropdown-menu a:hover {
+    background: rgba(2, 132, 199, 0.08);
+    color: var(--accent-color);
+}
+
+.hero{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    padding:120px 8% 70px;
+    position:relative;
+    z-index: 1;
+    background: 
+      var(--hero-overlay),
+      url('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=2000&q=85') center/cover no-repeat fixed;
+}
+
+.hero-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+    width: 100%;
+}
+
+.badge{
+    display:inline-block;
+    padding:8px 15px;
+    border:1px solid var(--accent-color);
+    border-radius:30px;
+    color: var(--accent-color);
+    background: rgba(2, 132, 199, 0.1);
+    font-size:13px;
+    font-weight: 700;
+    margin-bottom:25px;
+}
+
+.hero h1{
+    font-size:clamp(40px,5vw,68px);
+    line-height:1.08;
+    margin-bottom:25px;
+}
+
+.hero h1 span{ color: var(--accent-color); }
+
+.hero p{
+    color: var(--text-muted);
+    font-size:18px;
+    line-height:1.7;
+    font-weight: 500;
+}
+
+.buttons{ margin-top:35px; }
+
+.btn{
+    display:inline-block;
+    padding:14px 25px;
+    border-radius:10px;
+    text-decoration:none;
+    font-weight:700;
+    margin-right:12px;
+    cursor: pointer;
+    border: none;
+}
+
+.primary{ background: var(--accent-color); color: #ffffff; }
+.primary:hover{
+    transform:translateY(-3px);
+    box-shadow:0 10px 30px rgba(2, 132, 199, 0.35);
+}
+
+.secondary{
+    border:1px solid var(--border-color);
+    color: var(--text-color);
+    background: var(--card-bg);
+}
+
+.secondary:hover{ border-color: var(--accent-color); }
+
+.hero-img-container img {
+    width: 100%;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-15px); }
+}
+
+section{
+    padding:90px 8%;
+    position: relative;
+    z-index: 1;
+}
+
+.section-title{
+    text-align:center;
+    max-width:700px;
+    margin:auto;
+}
+
+.section-title h2{ font-size:38px; margin-bottom:15px; }
+.section-title p{ color: var(--text-muted); line-height:1.6; font-weight: 500; }
+
+#features {
+    background: 
+      var(--section-overlay-1),
+      url('https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=2000&q=80') center/cover no-repeat fixed;
+}
+
+.cards{
+    margin-top:50px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:25px;
+}
+
+.card{
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    border:1px solid var(--border-color);
+    border-radius:18px;
+    overflow: hidden;
+}
+
+.card:hover{
+    transform:translateY(-8px);
+    border-color: var(--accent-color);
+    box-shadow:0 15px 40px rgba(0,0,0,0.1);
+}
+
+.card-img { width: 100%; height: 180px; object-fit: cover; }
+.card-body { padding: 25px; }
+.card h3{ margin-bottom:12px; }
+.card p{ color: var(--text-muted); line-height:1.6; font-size:14px; }
+
+#how {
+    background: 
+      var(--section-overlay-2),
+      url('https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=2000&q=80') center/cover no-repeat fixed;
+}
+
+.steps{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:20px;
+    margin-top:50px;
+}
+
+.step{
+    text-align:center;
+    padding:25px;
+    background: var(--dashboard-bg);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+}
+
+.number{
+    width:50px; height:50px;
+    margin:auto auto 18px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: rgba(2, 132, 199, 0.12);
+    border:1px solid var(--accent-color);
+    color: var(--accent-color);
+    font-weight:700;
+}
+
+.step p{ color: var(--text-muted); margin-top:10px; font-size:14px; }
+
+#scan {
+    background: 
+      var(--section-overlay-1),
+      url('https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=2000&q=80') center/cover no-repeat fixed;
+}
+
+.dashboard{
+    margin-top:50px;
+    max-width:900px;
+    margin-left:auto; margin-right:auto;
+    background: var(--dashboard-bg);
+    backdrop-filter: blur(16px);
+    border:1px solid var(--border-color);
+    border-radius:20px;
+    padding:35px;
+    box-shadow:0 20px 70px rgba(0,0,0,0.12);
+}
+
+.scan-input-box { display: flex; gap: 10px; margin-bottom: 25px; }
+.scan-input-box input, .scan-input-box textarea {
+    flex: 1; padding: 14px 20px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: var(--input-bg);
+    color: var(--text-color);
+    outline: none; font-size: 15px;
+    font-family: inherit; resize: vertical;
+}
+
+.dashboard-top{ display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+.status{
+    color:#d97706; background:rgba(217, 119, 6, 0.15);
+    border:1px solid rgba(217, 119, 6, 0.4);
+    padding:8px 14px; border-radius:20px; font-size:13px; font-weight: 700;
+}
+
+.score{ font-size:50px; font-weight:800; color:#d97706; }
+.reason{
+    background: var(--card-bg);
+    padding:18px; border-radius:12px; margin-top:15px;
+    color: var(--text-muted); border: 1px solid var(--border-color);
+}
+
+.safety {
+    background: 
+      var(--section-overlay-2),
+      url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=2000&q=80') center/cover no-repeat fixed;
+}
+
+.safety-box{ max-width:800px; margin:auto; text-align:center; }
+.safety-box h2{ font-size:40px; margin-bottom:20px; }
+.safety-box p{ color: var(--text-muted); line-height:1.7; }
+
+#faq {
+    background: 
+      var(--section-overlay-1),
+      url('https://images.unsplash.com/photo-1510511459019-5dda7724fd87?auto=format&fit=crop&w=2000&q=80') center/cover no-repeat fixed;
+}
+
+.faq-container { max-width: 850px; margin: 50px auto 0; display: flex; flex-direction: column; gap: 15px; }
+.faq-item {
+    background: var(--dashboard-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
+    border-radius: 12px; overflow: hidden;
+}
+
+.faq-question {
+    padding: 20px 25px; display: flex; justify-content: space-between; align-items: center;
+    cursor: pointer; font-weight: 700; font-size: 16px; color: var(--text-color);
+}
+
+.faq-question:hover { color: var(--accent-color); }
+.faq-toggle-icon { font-size: 18px; transition: transform 0.3s ease; }
+.faq-answer {
+    max-height: 0; overflow: hidden; padding: 0 25px;
+    color: var(--text-muted); font-size: 14px; line-height: 1.6;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+}
+
+.faq-item.active .faq-answer { max-height: 200px; padding: 0 25px 20px 25px; }
+.faq-item.active .faq-toggle-icon { transform: rotate(45deg); }
+
+.modal-overlay {
+    position: fixed; top:0; left:0; width:100%; height:100%;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+    display: none; justify-content: center; align-items: center; z-index: 200;
+}
+
+.modal {
+    background: var(--dashboard-bg);
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(20px);
+    padding: 35px; border-radius: 20px;
+    width: 100%; max-width: 400px;
+    position: relative; color: var(--text-color);
+}
+
+.modal h3 { margin-bottom: 20px; font-size: 22px; }
+.modal input {
+    width: 100%; padding: 12px; margin-bottom: 15px;
+    border-radius: 8px; border: 1px solid var(--border-color);
+    background: var(--input-bg); color: var(--text-color);
+}
+
+.close-modal { position: absolute; top: 15px; right: 20px; cursor: pointer; font-size: 20px; color: var(--text-muted); }
+
+footer{
+    border-top:1px solid var(--border-color);
+    padding:30px 8%; display:flex; justify-content:space-between;
+    color: var(--text-muted); font-size:13px;
+    position: relative; z-index: 1; background: var(--nav-bg);
+}
+
+@media(max-width:900px){
+    .hero-wrapper { grid-template-columns: 1fr; }
+    .cards{ grid-template-columns:1fr; }
+    .steps{ grid-template-columns:1fr 1fr; }
+}
+
+@media(max-width:500px){
+    .steps{ grid-template-columns:1fr; }
+    .nav-links a { display: none; }
+}
+
+/* SHIELDSENSE FULL-STACK ENHANCEMENTS */
+textarea{width:100%;min-height:110px;padding:14px 18px;border-radius:10px;border:1px solid var(--border-color);background:var(--input-bg);color:var(--text-color);outline:none;font:inherit;resize:vertical;}
+.scan-mode-tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+.scan-tab{padding:10px 16px;border-radius:12px;border:1px solid var(--border-color);background:var(--card-bg);color:var(--text-color);cursor:pointer;font-weight:700;}
+.scan-tab.active,.scan-tab:hover{border-color:var(--accent-color);color:var(--accent-color);box-shadow:0 8px 20px rgba(0,229,255,.08);}
+.file-panel{align-items:center;}.file-drop{flex:1;min-height:110px;border:1px dashed var(--accent-color);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;cursor:pointer;background:var(--card-bg);color:var(--text-color);}.file-drop span{font-size:12px;color:var(--text-muted);}.login-scan-notice{display:none;margin-top:15px;padding:12px 15px;border-radius:10px;background:rgba(217,119,6,.12);border:1px solid rgba(217,119,6,.3);color:var(--text-muted);font-size:13px;}
+.footer-login{border:1px solid var(--border-color);background:transparent;color:var(--text-color);padding:7px 12px;border-radius:8px;cursor:pointer;}
+.account-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(12px);z-index:300;display:none;align-items:center;justify-content:center;padding:20px;}.account-panel{width:min(1050px,96vw);height:min(700px,90vh);display:flex;position:relative;overflow:hidden;background:var(--dashboard-bg);border:1px solid var(--border-color);border-radius:24px;box-shadow:0 30px 100px rgba(0,0,0,.4);}.account-close{position:absolute;right:18px;top:12px;background:none;border:0;color:var(--text-muted);font-size:30px;cursor:pointer;z-index:3;}.account-sidebar{width:250px;padding:35px 20px;background:rgba(0,0,0,.12);border-right:1px solid var(--border-color);}.account-mini-profile{text-align:center;padding-bottom:25px;border-bottom:1px solid var(--border-color);margin-bottom:15px;}.big-avatar{width:90px;height:90px;border-radius:50%;margin:0 auto 12px;background:linear-gradient(135deg,var(--accent-color),#1e3a8a);background-size:cover;background-position:center;border:3px solid var(--accent-color);}.account-mini-profile h3{margin-bottom:4px}.account-mini-profile p{color:var(--text-muted);font-size:12px;word-break:break-all}.account-nav{width:100%;text-align:left;padding:13px 14px;margin:4px 0;border:0;border-radius:10px;background:transparent;color:var(--text-color);cursor:pointer;font-weight:600;}.account-nav:hover,.account-nav.active{background:rgba(2,132,199,.12);color:var(--accent-color);}.account-content{flex:1;padding:55px 40px;overflow:auto}.account-content h2{font-size:30px;margin-bottom:8px}.muted{color:var(--text-muted);}.dash-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:30px 0}.dash-stats>div{padding:24px;border:1px solid var(--border-color);border-radius:16px;background:var(--card-bg);text-align:center}.dash-stats b{display:block;font-size:28px;color:var(--accent-color)}.dash-stats span{font-size:12px;color:var(--text-muted)}.history-list{margin-top:25px;display:flex;flex-direction:column;gap:12px}.history-item{padding:16px;border:1px solid var(--border-color);border-radius:14px;background:var(--card-bg);}.history-item-top{display:flex;justify-content:space-between;gap:10px}.history-score{font-weight:800}.profile-edit{display:grid;grid-template-columns:180px 1fr;gap:35px;margin-top:30px}.profile-photo-editor{text-align:center}.profile-fields{display:flex;flex-direction:column;gap:15px}.profile-fields label{font-size:13px;font-weight:700}.profile-fields input{width:100%;margin-top:7px;padding:12px;border-radius:9px;border:1px solid var(--border-color);background:var(--input-bg);color:var(--text-color)}.settings-card{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:20px;margin-top:15px;border:1px solid var(--border-color);border-radius:14px;background:var(--card-bg)}.settings-card p{font-size:13px;color:var(--text-muted);margin-top:5px}.danger-setting{border-color:rgba(239,68,68,.3);}
+@media(max-width:700px){.account-panel{height:94vh;flex-direction:column}.account-sidebar{width:100%;display:flex;overflow:auto;gap:5px;padding:15px}.account-mini-profile{display:none}.account-nav{min-width:max-content}.account-content{padding:45px 20px}.profile-edit{grid-template-columns:1fr}.dash-stats{grid-template-columns:1fr}.scan-input-box{flex-direction:column}.file-drop{width:100%}}
+
+/* --- Added: OTP / password-reset / strength-meter / export UI (new elements only, same theme variables) --- */
+.modal-link{background:none;border:0;color:var(--accent-color);font-size:13px;cursor:pointer;text-decoration:underline;padding:0;margin:-6px 0 16px;display:inline-block}
+.pw-strength{height:5px;border-radius:3px;background:rgba(148,163,184,.25);margin:10px 0 4px;overflow:hidden}
+.pw-strength-bar{height:100%;width:0%;background:#ef4444;transition:width .25s ease,background .25s ease}
+.pw-strength-label{font-size:11px;color:var(--text-muted);margin:0 0 14px;display:block}
+.otp-input{letter-spacing:8px;font-size:22px;text-align:center;font-weight:700}
+.otp-hint{font-size:12px;color:var(--text-muted);margin:-4px 0 14px;line-height:1.5}
+.dev-otp-banner{background:rgba(217,119,6,.12);border:1px solid rgba(217,119,6,.3);color:var(--text-muted);font-size:12px;padding:10px 12px;border-radius:9px;margin:-4px 0 14px}
+.resend-row{display:flex;align-items:center;justify-content:space-between;margin:-6px 0 16px;font-size:12px;color:var(--text-muted)}
+.history-list-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.badge-verified{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:rgba(16,185,129,.15);color:#10b981;border:1px solid rgba(16,185,129,.3);margin-left:8px;vertical-align:middle}
+.risk-breakdown{margin:26px 0;padding:22px;border:1px solid var(--border-color);border-radius:16px;background:var(--card-bg)}
+.risk-breakdown h4{font-size:13px;color:var(--text-muted);margin-bottom:14px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.risk-row{display:flex;align-items:center;gap:12px;margin:10px 0;font-size:13px}
+.risk-row .risk-label{width:76px;flex-shrink:0;font-weight:700}
+.risk-row .risk-track{flex:1;height:10px;border-radius:6px;background:rgba(148,163,184,.18);overflow:hidden}
+.risk-row .risk-fill{height:100%;border-radius:6px;transition:width .4s ease}
+.risk-row .risk-count{width:26px;text-align:right;color:var(--text-muted);flex-shrink:0}
+.risk-empty{font-size:13px;color:var(--text-muted)}
+</style>
+</head>
+<body>
+
+<canvas id="particles-canvas"></canvas>
+
+<!-- NAVBAR -->
+<nav>
+    <div class="logo">🛡️ Shield<span>Sense</span></div>
+
+    <div class="nav-links">
+        <a href="#features">What We Check</a>
+        <a href="#how">How It Works</a>
+        <a href="#scan">Try It Now</a>
+        <a href="#faq">FAQ</a>
+        <button class="theme-toggle-btn" onclick="toggleTheme()">🌓 Toggle Mode</button>
+        
+        <div class="auth-btn-group" id="authButtons">
+            <button class="btn primary btn-sm" onclick="openModal('login')">Log In</button>
+            <button class="btn secondary btn-sm" onclick="openModal('signup')">Sign Up</button>
+        </div>
+
+        <div class="profile-container" id="profileMenu">
+            <div class="profile-avatar" onclick="toggleDropdown()"></div>
+            <div class="dropdown-menu" id="dropdownApp">
+                <div class="dropdown-header">
+                    <p id="userName">Alex Vance</p>
+                    <span>alex.vance@sec.io</span>
+                </div>
+                <a href="#scan">📊 Dashboard</a>
+                <a href="#scan">🔍 New Link Scan</a>
+                <a href="#scan">📜 Past Checks</a>
+                <a href="#scan">⚙️ Settings</a>
+                <a href="#" onclick="logout()" style="color:#ef4444;">🚪 Log Out</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-wrapper">
+        <div class="hero-content">
+            <div class="badge">🤖 EASY & SMART LINK SAFETY</div>
+            <h1>Don't click blindly.<br><span>Check before you open.</span></h1>
+            <p>Unsure if a link or email is safe? Paste it here. ShieldSense warns you if it's a scam before you open it.</p>
+            <div class="buttons">
+                <a href="#scan" class="btn primary">🔍 Check a Link</a>
+                <a href="#how" class="btn secondary">See How It Works →</a>
+                <button class="btn secondary" onclick="openModal('login')">🔐 Sign in to Continue</button>
+            </div>
+        </div>
+        <div class="hero-img-container">
+            <img src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=1000&q=80" alt="Cyber Shield Guard">
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+    <div class="section-title">
+        <h2>What We Scan For You</h2>
+        <p>Simple protection for your daily browsing and emails.</p>
+    </div>
+
+    <div class="cards">
+        <div class="card">
+            <img class="card-img" src="https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=600&q=80" alt="Link Scanning">
+            <div class="card-body">
+                <h3>Fake Website Links</h3>
+                <p>We spot fake web addresses designed to look like real banks, stores, or social media sites.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <img class="card-img" src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=600&q=80" alt="Email Analysis">
+            <div class="card-body">
+                <h3>Scam Emails & Texts</h3>
+                <p>We flag urgent messages asking for money, passwords, or personal account details.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <img class="card-img" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80" alt="File Analysis">
+            <div class="card-body">
+                <h3>Unsafe Downloads</h3>
+                <p>Check downloadable files before opening them to protect your phone or computer from viruses.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+    <div class="section-title">
+        <h2>How ShieldSense Works</h2>
+        <p>Get a quick safety answer in 4 simple steps.</p>
+    </div>
+
+    <div class="steps">
+        <div class="step">
+            <div class="number">01</div>
+            <h3>Paste Item</h3>
+            <p>Copy and paste any suspicious website link or email message.</p>
+        </div>
+        <div class="step">
+            <div class="number">02</div>
+            <h3>Quick Scan</h3>
+            <p>Our tool inspects the web address and sender details instantly.</p>
+        </div>
+        <div class="step">
+            <div class="number">03</div>
+            <h3>Clear Summary</h3>
+            <p>Get an easy-to-read explanation in plain English—no technical jargon.</p>
+        </div>
+        <div class="step">
+            <div class="number">04</div>
+            <h3>Stay Safe</h3>
+            <p>Follow our quick tip on whether to open, ignore, or delete it.</p>
+        </div>
+    </div>
+</section>
+
+<!-- INTERACTIVE DEMO -->
+<section id="scan">
+    <div class="section-title">
+        <h2>Try Checking a Link Right Now</h2>
+        <p>Test the link scanner below with a sample link.</p>
+    </div>
+
+    <div class="dashboard">
+        <div class="scan-mode-tabs">
+            <button class="scan-tab active" onclick="setScanMode('url',this)">🔗 URL</button>
+            <button class="scan-tab" onclick="setScanMode('email',this)">✉️ Email / Message</button>
+            <button class="scan-tab" onclick="setScanMode('file',this)">📁 File Upload</button>
+        </div>
+        <div id="urlScanBox" class="scan-input-box scan-panel">
+            <textarea id="scanInput" style="min-height:44px;" placeholder="Paste a suspicious URL here... (paste several, one per line, to scan them all at once)">http://paypal.secure-update-account.com/login</textarea>
+            <button class="btn primary" onclick="runRealScan('url')">🔍 Analyze URL</button>
+        </div>
+        <p class="muted" id="bulkHint" style="margin:-15px 0 20px;font-size:13px;">Tip: paste multiple links (one per line) to scan up to <span id="bulkMax">25</span> at once.</p>
+        <div id="emailScanBox" class="scan-input-box scan-panel" style="display:none;">
+            <textarea id="emailInput" placeholder="Paste the suspicious email or message here..."></textarea>
+            <button class="btn primary" onclick="runRealScan('email')">🧠 Analyze Email</button>
+        </div>
+        <div id="fileScanBox" class="scan-input-box scan-panel file-panel" style="display:none;">
+            <label class="file-drop" for="fileInput">📎 <strong>Choose a file</strong><span id="fileName">PDF, image, text, document, CSV, JSON, EML...</span></label>
+            <input id="fileInput" type="file" hidden onchange="showFileName(this)">
+            <button class="btn primary" onclick="runRealScan('file')">🛡️ Analyze File</button>
+        </div>
+        <div id="loginScanNotice" class="login-scan-notice">🔒 Please sign in or create an account before running a real scan. Your scan history is saved to your account.</div>
+
+        <div class="dashboard-top">
+            <div>
+                <h3>Scan Results</h3>
+                <p style="color:var(--text-muted);margin-top:5px;" id="scannedUrlDisplay">http://paypal.secure-update-account.com/login</p>
+            </div>
+            <div class="status" id="riskLabel">⚠️ HIGH RISK SCAM</div>
+        </div>
+
+        <div class="score" id="riskScore">78<span style="font-size:20px;color:var(--text-muted);">/100 Risk</span></div>
+
+        <div class="reason" id="riskReason">
+            <strong>Safety Summary:</strong><br><br>
+            • This is NOT the real PayPal website. It is a fake website.<br>
+            • It tries to trick you into entering your banking password.<br>
+            • **Recommendation:** Do not click this link or type your login details.
+        </div>
+
+        <div id="bulkResultsWrap" style="display:none;margin-top:15px;">
+            <h3 style="margin-bottom:10px;">Bulk Scan Results (<span id="bulkCount">0</span> links)</h3>
+            <div id="bulkResultsList"></div>
+        </div>
+    </div>
+</section>
+
+<!-- SAFETY -->
+<section class="safety" id="security">
+    <div class="safety-box">
+        <h2>You Are Always in Control</h2>
+        <p>ShieldSense helps you make smart choices online. We give you clear information so you can decide what to do next safely.</p>
+
+        <div class="cards" style="margin-top:30px;">
+            <div class="card">
+                <div class="card-body">
+                    <div style="font-size:30px;margin-bottom:10px;">💬</div>
+                    <h3>Easy Language</h3>
+                    <p>No confusing technical words. Just straightforward answers.</p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <div style="font-size:30px;margin-bottom:10px;">🚦</div>
+                    <h3>Clear Risk Score</h3>
+                    <p>Green means safe, red means stay away. It's that simple.</p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <div style="font-size:30px;margin-bottom:10px;">🛡️</div>
+                    <h3>Your Choice</h3>
+                    <p>We never change or delete anything on your device automatically.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+    <div class="section-title">
+        <h2>Frequently Asked Questions</h2>
+        <p>Simple answers to everyday questions about online safety.</p>
+    </div>
+
+    <div class="faq-container">
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <span>How do I know if a link sent to me in a text message is fake?</span>
+                <span class="faq-toggle-icon">+</span>
+            </div>
+            <div class="faq-answer">
+                Fake text links usually urge you to act fast (e.g., "Your package is delayed" or "Your bank account is locked"). You can copy the web address from the text message and paste it into ShieldSense to check if it's safe before clicking.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <span>Is ShieldSense free to use?</span>
+                <span class="faq-toggle-icon">+</span>
+            </div>
+            <div class="faq-answer">
+                Yes! You can check links and emails here for free anytime to make sure you stay safe while browsing online.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <span>What should I do if I already clicked a suspicious link?</span>
+                <span class="faq-toggle-icon">+</span>
+            </div>
+            <div class="faq-answer">
+                If you entered a password on a fake site, change that password immediately on the real company's official website. If you shared credit card info, call your bank right away to block any fraud.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <span>Does ShieldSense save or store my private messages?</span>
+                <span class="faq-toggle-icon">+</span>
+            </div>
+            <div class="faq-answer">
+                No. Whatever link or text message snippet you paste into ShieldSense is checked immediately for threats and is never shared or stored on our servers.
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ACCOUNT PANELS -->
+<div class="account-overlay" id="accountOverlay">
+  <div class="account-panel">
+    <button class="account-close" onclick="closeAccountPanel()">×</button>
+    <div class="account-sidebar">
+      <div class="account-mini-profile"><div class="big-avatar" id="panelAvatar"></div><h3 id="panelName">Account</h3><p id="panelEmail"></p></div>
+      <button class="account-nav active" onclick="showAccountTab('dashboard',this)">📊 Dashboard</button>
+      <button class="account-nav" onclick="showAccountTab('history',this)">📜 Past History</button>
+      <button class="account-nav" onclick="showAccountTab('profile',this)">👤 Profile Info</button>
+      <button class="account-nav" onclick="showAccountTab('settings',this)">⚙️ Settings</button>
+    </div>
+    <div class="account-content">
+      <section id="tab-dashboard" class="account-tab-content"><h2>Security Dashboard</h2><p class="muted">Your ShieldSense activity at a glance.</p><div class="dash-stats"><div><b id="historyCount">0</b><span>Scans</span></div><div><b>24/7</b><span>Protection</span></div><div><b>AI</b><span>Analysis</span></div></div><div id="riskBreakdown" class="risk-breakdown"></div><button class="btn primary" onclick="closeAccountPanel();location.hash='scan';">🔍 Start New Scan</button></section>
+      <section id="tab-history" class="account-tab-content" style="display:none"><div class="history-list-head"><div><h2>Past Checks</h2><p class="muted">Your latest URL, email and file analyses.</p></div><button class="btn secondary" onclick="exportHistory()">⬇️ Export CSV</button></div><div id="historyList" class="history-list">Loading...</div></section>
+      <section id="tab-profile" class="account-tab-content" style="display:none"><h2>Profile Information</h2><div class="profile-edit"><div class="profile-photo-editor"><div class="big-avatar" id="profileEditorAvatar"></div><label class="btn secondary" for="profilePhotoInput">📷 Add / Change Photo</label><input id="profilePhotoInput" type="file" accept="image/*" hidden onchange="uploadProfilePhoto(this)"></div><div class="profile-fields"><label>Name<input id="profileNameInput"></label><label>Email<input id="profileEmailInput" type="email"></label><button class="btn primary" onclick="saveProfile()">Save Account Info</button><div id="profileMsg"></div></div></div></section>
+      <section id="tab-settings" class="account-tab-content" style="display:none"><h2>Settings</h2><div class="settings-card"><div><b>Appearance</b><p>Use the theme toggle in the top navigation.</p></div><button class="btn secondary" onclick="toggleTheme()">🌓 Toggle Theme</button></div><div class="settings-card"><div><b>Account Security</b><p>Your password is stored as a secure hash and is never displayed.</p></div></div><div class="settings-card danger-setting"><div><b>Sign out</b><p>End your current ShieldSense session on this device.</p></div><button class="btn secondary" onclick="logout()">🚪 Log Out</button></div></section>
+    </div>
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="authModal">
+    <div class="modal">
+        <span class="close-modal" onclick="closeModal()">×</span>
+        <h3 id="modalTitle">Log In to ShieldSense</h3>
+        <input type="text" id="modalName" placeholder="Your full name" style="display:none">
+        <input type="email" id="modalEmail" placeholder="Enter your email address">
+        <input type="password" id="modalPassword" placeholder="Password (8+ chars, letter + number)" oninput="updatePwStrength()">
+        <div class="pw-strength" id="pwStrengthWrap" style="display:none"><div class="pw-strength-bar" id="pwStrengthBar"></div></div>
+        <span class="pw-strength-label" id="pwStrengthLabel" style="display:none"></span>
+        <button type="button" class="modal-link" id="forgotPwLink" style="display:none" onclick="closeModal();openForgotModal();">Forgot your password?</button>
+        <div id="authError" style="display:none;color:#ef4444;font-size:13px;margin:-5px 0 12px;"></div>
+        <button class="btn primary" style="width:100%" onclick="handleAuth()">Submit</button>
+    </div>
+</div>
+
+<!-- OTP VERIFICATION MODAL -->
+<div class="modal-overlay" id="otpModal">
+    <div class="modal">
+        <span class="close-modal" onclick="closeOtpModal()">×</span>
+        <h3>Verify Your Email</h3>
+        <p class="otp-hint">We sent a 6-digit code to <strong id="otpEmailDisplay"></strong>. Enter it below to continue.</p>
+        <div id="devOtpBanner" class="dev-otp-banner" style="display:none"></div>
+        <input type="text" id="otpCode" class="otp-input" placeholder="••••••" maxlength="6" inputmode="numeric" autocomplete="one-time-code">
+        <div id="otpError" style="display:none;color:#ef4444;font-size:13px;margin:8px 0 12px;"></div>
+        <div class="resend-row"><span id="resendStatus">Didn't get it?</span><button type="button" class="modal-link" id="resendOtpBtn" style="margin:0" onclick="resendOtp()">Resend code</button></div>
+        <button class="btn primary" style="width:100%" onclick="submitOtp()">Verify & Continue</button>
+    </div>
+</div>
+
+<!-- FORGOT PASSWORD MODAL -->
+<div class="modal-overlay" id="forgotModal">
+    <div class="modal">
+        <span class="close-modal" onclick="closeForgotModal()">×</span>
+        <h3 id="forgotTitle">Reset Your Password</h3>
+        <div id="forgotStep1">
+            <input type="email" id="forgotEmail" placeholder="Enter your account email">
+            <div id="forgotError1" style="display:none;color:#ef4444;font-size:13px;margin:-5px 0 12px;"></div>
+            <button class="btn primary" style="width:100%" onclick="submitForgotRequest()">Send Reset Code</button>
+        </div>
+        <div id="forgotStep2" style="display:none">
+            <p class="otp-hint">Enter the 6-digit code we sent, then choose a new password.</p>
+            <div id="devOtpBannerReset" class="dev-otp-banner" style="display:none"></div>
+            <input type="text" id="resetCode" class="otp-input" placeholder="••••••" maxlength="6" inputmode="numeric">
+            <input type="password" id="resetNewPassword" placeholder="New password (8+ chars, letter + number)" oninput="updateResetPwStrength()" style="margin-top:12px">
+            <div class="pw-strength" id="resetPwStrengthWrap" style="display:none"><div class="pw-strength-bar" id="resetPwStrengthBar"></div></div>
+            <span class="pw-strength-label" id="resetPwStrengthLabel" style="display:none"></span>
+            <div id="forgotError2" style="display:none;color:#ef4444;font-size:13px;margin:-5px 0 12px;"></div>
+            <button class="btn primary" style="width:100%" onclick="submitPasswordReset()">Set New Password</button>
+        </div>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <div>© 2026 ShieldSense. Safe & Simple Internet Guard.</div>
+    <div>Privacy Policy | Terms &nbsp; <button class="footer-login" onclick="openModal('login')">🔐 Sign in / Sign up to continue</button></div>
+</footer>
+
+<script>
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    if (currentTheme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+    }
+}
+
+function openModal(type) {
+    document.getElementById('modalTitle').innerText = type === 'login' ? 'Log In to ShieldSense' : 'Create a Free Account';
+    document.getElementById('modalName').style.display = type === 'signup' ? 'block' : 'none';
+    document.getElementById('modalPassword').placeholder = type === 'signup' ? 'Create a password (8+ chars, letter + number)' : 'Password';
+    document.getElementById('pwStrengthWrap').style.display = type === 'signup' ? 'block' : 'none';
+    document.getElementById('pwStrengthLabel').style.display = type === 'signup' ? 'block' : 'none';
+    document.getElementById('forgotPwLink').style.display = type === 'login' ? 'inline-block' : 'none';
+    document.getElementById('modalPassword').value = '';
+    updatePwStrength();
+    document.getElementById('authModal').dataset.mode = type;
+    document.getElementById('authError').style.display = 'none';
+    document.getElementById('authModal').style.display = 'flex';
+}
+function closeModal(){document.getElementById('authModal').style.display='none';}
+
+// --- Password strength meter (client-side hint only; server still enforces the real rule) ---
+function scorePassword(pw){
+    let score=0;
+    if(pw.length>=8) score++;
+    if(pw.length>=12) score++;
+    if(/[A-Z]/.test(pw)&&/[a-z]/.test(pw)) score++;
+    if(/\d/.test(pw)) score++;
+    if(/[^A-Za-z0-9]/.test(pw)) score++;
+    return score;
+}
+function applyPwStrength(pw,barId,labelId){
+    const bar=document.getElementById(barId), label=document.getElementById(labelId);
+    if(!bar||!label) return;
+    const s=scorePassword(pw);
+    const levels=[{w:'6%',c:'#ef4444',t:'Very weak'},{w:'25%',c:'#ef4444',t:'Weak'},{w:'50%',c:'#d97706',t:'Fair'},{w:'75%',c:'#0ea5e9',t:'Good'},{w:'100%',c:'#10b981',t:'Strong'}];
+    const lvl=levels[Math.min(s,4)];
+    bar.style.width=pw?lvl.w:'0%'; bar.style.background=lvl.c;
+    label.innerText=pw?('Password strength: '+lvl.t):'';
+}
+function updatePwStrength(){applyPwStrength(document.getElementById('modalPassword').value,'pwStrengthBar','pwStrengthLabel');}
+function updateResetPwStrength(){applyPwStrength(document.getElementById('resetNewPassword').value,'resetPwStrengthBar','resetPwStrengthLabel');}
+
+// --- CSRF token: fetched once and attached to every state-changing request ---
+let csrfToken='';
+async function loadCsrfToken(){try{const r=await fetch('/api/csrf-token');const d=await r.json();csrfToken=d.csrf_token;}catch(e){}}
+function csrfHeaders(extra){return Object.assign({'X-CSRF-Token':csrfToken},extra||{});}
+function showAuthError(msg,ok){const e=document.getElementById('authError');e.innerText=msg;e.style.color=ok?'#10b981':'#ef4444';e.style.display='block';}
+async function handleAuth(){
+    const modal=document.getElementById('authModal'), mode=modal.dataset.mode||'login';
+    const payload={email:document.getElementById('modalEmail').value.trim(),password:document.getElementById('modalPassword').value};
+    if(mode==='signup') payload.name=document.getElementById('modalName').value.trim();
+    try{
+        const r=await fetch('/api/'+mode,{method:'POST',headers:csrfHeaders({'Content-Type':'application/json'}),body:JSON.stringify(payload)});
+        const d=await r.json();
+        if(d.requires_otp){ closeModal(); openOtpModal(d.email,'signup',d); return; }
+        if(!r.ok){showAuthError(d.error||'Something went wrong.');return;}
+        closeModal();applyUser(d.user);updateScanAccess();
+    }catch(e){showAuthError('Cannot reach the ShieldSense server. Start the Flask app and try again.');}
+}
+
+// --- OTP verification modal ---
+let otpContext={email:'',purpose:'signup'};
+let resendCooldownTimer=null;
+function showDevOtpBanner(bannerId,d){
+    const b=document.getElementById(bannerId);
+    if(d && d.dev_mode && d.dev_otp){ b.style.display='block'; b.innerText='Demo mode (no email server configured): your code is '+d.dev_otp; }
+    else { b.style.display='none'; b.innerText=''; }
+}
+function openOtpModal(email,purpose,initialResp){
+    otpContext={email,purpose};
+    document.getElementById('otpEmailDisplay').innerText=email;
+    document.getElementById('otpCode').value='';
+    document.getElementById('otpError').style.display='none';
+    showDevOtpBanner('devOtpBanner',initialResp);
+    document.getElementById('otpModal').style.display='flex';
+    startResendCooldown();
+}
+function closeOtpModal(){document.getElementById('otpModal').style.display='none';if(resendCooldownTimer)clearInterval(resendCooldownTimer);}
+function startResendCooldown(){
+    let seconds=45;
+    const btn=document.getElementById('resendOtpBtn'), status=document.getElementById('resendStatus');
+    btn.style.display='none'; status.innerText='Resend available in '+seconds+'s';
+    if(resendCooldownTimer)clearInterval(resendCooldownTimer);
+    resendCooldownTimer=setInterval(()=>{
+        seconds--;
+        if(seconds<=0){clearInterval(resendCooldownTimer);status.innerText="Didn't get it?";btn.style.display='inline-block';}
+        else status.innerText='Resend available in '+seconds+'s';
+    },1000);
+}
+async function submitOtp(){
+    const code=document.getElementById('otpCode').value.trim();
+    const err=document.getElementById('otpError');
+    if(!/^\d{6}$/.test(code)){err.innerText='Enter the 6-digit code.';err.style.display='block';return;}
+    try{
+        const r=await fetch('/api/otp/verify',{method:'POST',headers:csrfHeaders({'Content-Type':'application/json'}),body:JSON.stringify({email:otpContext.email,code,purpose:otpContext.purpose})});
+        const d=await r.json();
+        if(!r.ok){err.innerText=d.error||'Could not verify that code.';err.style.display='block';return;}
+        closeOtpModal();
+        if(otpContext.purpose==='signup'){applyUser(d.user);updateScanAccess();}
+    }catch(e){err.innerText='Cannot reach the ShieldSense server.';err.style.display='block';}
+}
+async function resendOtp(){
+    try{
+        const r=await fetch('/api/otp/resend',{method:'POST',headers:csrfHeaders({'Content-Type':'application/json'}),body:JSON.stringify({email:otpContext.email,purpose:otpContext.purpose})});
+        const d=await r.json();
+        showDevOtpBanner('devOtpBanner',d);
+        startResendCooldown();
+    }catch(e){}
+}
+
+// --- Forgot / reset password modal ---
+function openForgotModal(){
+    document.getElementById('forgotStep1').style.display='block';
+    document.getElementById('forgotStep2').style.display='none';
+    document.getElementById('forgotTitle').innerText='Reset Your Password';
+    document.getElementById('forgotEmail').value='';
+    document.getElementById('forgotError1').style.display='none';
+    document.getElementById('forgotModal').style.display='flex';
+}
+function closeForgotModal(){document.getElementById('forgotModal').style.display='none';}
+async function submitForgotRequest(){
+    const email=document.getElementById('forgotEmail').value.trim();
+    const err=document.getElementById('forgotError1');
+    try{
+        const r=await fetch('/api/password/forgot',{method:'POST',headers:csrfHeaders({'Content-Type':'application/json'}),body:JSON.stringify({email})});
+        const d=await r.json();
+        if(!r.ok){err.innerText=d.error||'Something went wrong.';err.style.display='block';return;}
+        otpContext={email,purpose:'reset'};
+        document.getElementById('forgotStep1').style.display='none';
+        document.getElementById('forgotStep2').style.display='block';
+        document.getElementById('forgotTitle').innerText='Enter Your Reset Code';
+        showDevOtpBanner('devOtpBannerReset',d);
+    }catch(e){err.innerText='Cannot reach the ShieldSense server.';err.style.display='block';}
+}
+async function submitPasswordReset(){
+    const code=document.getElementById('resetCode').value.trim();
+    const new_password=document.getElementById('resetNewPassword').value;
+    const err=document.getElementById('forgotError2');
+    try{
+        const r=await fetch('/api/password/reset',{method:'POST',headers:csrfHeaders({'Content-Type':'application/json'}),body:JSON.stringify({email:otpContext.email,code,new_password})});
+        const d=await r.json();
+        if(!r.ok){err.innerText=d.error||'Could not reset your password.';err.style.display='block';return;}
+        closeForgotModal();
+        openModal('login');
+        showAuthError('Password updated. Please log in with your new password.',true);
+    }catch(e){err.innerText='Cannot reach the ShieldSense server.';err.style.display='block';}
+}
+function applyUser(u){
+    if(!u)return;
+    document.getElementById('userName').innerText=u.name;
+    const headerEmail=document.querySelector('#profileMenu .dropdown-header span'); if(headerEmail)headerEmail.innerText=u.email;
+    document.getElementById('authButtons').style.display='none';document.getElementById('profileMenu').style.display='block';
+    const photo=u.profile_image?`url('${u.profile_image}')`:'';
+    document.querySelector('.profile-avatar').style.backgroundImage=photo||'';
+    ['panelAvatar','profileEditorAvatar'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.backgroundImage=photo||'';});
+    document.getElementById('panelName').innerHTML=escapeHtml(u.name)+(u.is_verified?' <span class="badge-verified">✓ Verified</span>':'');document.getElementById('panelEmail').innerText=u.email;
+    document.getElementById('profileNameInput').value=u.name;document.getElementById('profileEmailInput').value=u.email;
+}
+async function loadMe(){try{const r=await fetch('/api/me');const d=await r.json();if(d.logged_in)applyUser(d.user);updateScanAccess();}catch(e){}}
+function updateScanAccess(){const logged= document.getElementById('authButtons').style.display==='none';document.getElementById('loginScanNotice').style.display=logged?'none':'block';}
+async function logout(){await fetch('/api/logout',{method:'POST',headers:csrfHeaders()});location.reload();}
+function toggleDropdown(){document.getElementById('dropdownApp').classList.toggle('active');}
+function openAccountPanel(tab='dashboard'){document.getElementById('accountOverlay').style.display='flex';showAccountTab(tab);loadHistory();}
+function closeAccountPanel(){document.getElementById('accountOverlay').style.display='none';}
+function showAccountTab(tab,btn){document.querySelectorAll('.account-tab-content').forEach(x=>x.style.display='none');const el=document.getElementById('tab-'+tab);if(el)el.style.display='block';document.querySelectorAll('.account-nav').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active');}
+async function loadHistory(){try{const r=await fetch('/api/history');if(!r.ok)return;const d=await r.json();document.getElementById('historyCount').innerText=d.history.length;renderRiskBreakdown(d.history);const list=document.getElementById('historyList');if(!d.history.length){list.innerHTML='<div class="history-item">No scans yet. Start your first ShieldSense scan.</div>';return;}list.innerHTML=d.history.map(x=>`<div class="history-item"><div class="history-item-top"><b>${escapeHtml(x.scan_type.toUpperCase())}</b><span class="history-score">${x.score}/100 · ${escapeHtml(x.danger)}</span></div><p class="muted" style="margin-top:8px;word-break:break-word">${escapeHtml(x.input_preview||'')}</p><small class="muted">${new Date(x.created_at).toLocaleString()}</small><p style="margin-top:8px">${escapeHtml(x.summary)}</p></div>`).join('');}catch(e){}}
+function renderRiskBreakdown(history){
+    const el=document.getElementById('riskBreakdown'); if(!el) return;
+    if(!history.length){el.innerHTML='<h4>Risk Breakdown</h4><p class="risk-empty">Run a scan to see your risk breakdown here.</p>';return;}
+    const levels=[{key:'SAFE',color:'#10b981'},{key:'LOW',color:'#0ea5e9'},{key:'MEDIUM',color:'#d97706'},{key:'HIGH',color:'#ef4444'},{key:'CRITICAL',color:'#b91c1c'}];
+    const counts={}; levels.forEach(l=>counts[l.key]=0);
+    history.forEach(h=>{const k=(h.danger||'').toUpperCase(); if(counts[k]!==undefined)counts[k]++;});
+    const max=Math.max(1,...Object.values(counts));
+    el.innerHTML='<h4>Risk Breakdown</h4>'+levels.map(l=>`<div class="risk-row"><span class="risk-label" style="color:${l.color}">${l.key}</span><div class="risk-track"><div class="risk-fill" style="width:${(counts[l.key]/max*100)}%;background:${l.color}"></div></div><span class="risk-count">${counts[l.key]}</span></div>`).join('');
+}
+function escapeHtml(s){return String(s||'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+function openDashboard(){openAccountPanel('dashboard')}
+function openHistory(){openAccountPanel('history')}
+function openProfile(){openAccountPanel('profile')}
+function openSettings(){openAccountPanel('settings')}
+async function saveProfile(){const msg=document.getElementById('profileMsg');const r=await fetch('/api/profile',{method:'PUT',headers:csrfHeaders({'Content-Type':'application/json'}),body:JSON.stringify({name:document.getElementById('profileNameInput').value,email:document.getElementById('profileEmailInput').value})});const d=await r.json();msg.innerText=d.ok===false?d.error:'Saved successfully.';msg.style.color=d.ok===false?'#ef4444':'#10b981';if(r.ok)applyUser(d.user);}
+async function uploadProfilePhoto(input){if(!input.files[0])return;const fd=new FormData();fd.append('photo',input.files[0]);const r=await fetch('/api/profile/photo',{method:'POST',headers:csrfHeaders(),body:fd});const d=await r.json();if(r.ok&&d.user)applyUser(d.user);else alert(d.error||'Could not update photo.');}
+function exportHistory(){window.location.href='/api/history/export';}
+function setScanMode(mode,btn){document.querySelectorAll('.scan-tab').forEach(x=>x.classList.remove('active'));btn.classList.add('active');['url','email','file'].forEach(x=>document.getElementById(x+'ScanBox').style.display=x===mode?'flex':'none');}
+function showFileName(input){document.getElementById('fileName').innerText=input.files[0]?input.files[0].name:'PDF, image, text, document, CSV, JSON, EML...';}
+function riskColor(score){return score>=70?'#ef4444':score>=40?'#d97706':'#10b981';}
+function riskIcon(danger,score){return danger==='SAFE'?'✅ ':score>=70?'🚨 ':'⚠️ ';}
+
+function renderSingleResult(d){
+    document.getElementById('bulkResultsWrap').style.display='none';
+    document.getElementById('scannedUrlDisplay').innerText=d.input_preview;
+    document.getElementById('riskScore').innerHTML=`${d.score}<span style="font-size:20px;color:var(--text-muted);">/100 Risk</span>`;
+    document.getElementById('riskScore').style.color=riskColor(d.score);
+    const label=document.getElementById('riskLabel');
+    label.innerText=riskIcon(d.danger,d.score)+d.danger;
+    label.style.color=riskColor(d.score);
+    document.getElementById('riskReason').innerHTML=`<strong>Safety Summary:</strong><br><br>${escapeHtml(d.summary)}<br><br><strong>Why:</strong><br>• ${d.reasons.map(escapeHtml).join('<br>• ')}<br><br><strong>Recommendation:</strong> ${escapeHtml(d.recommendation||'Verify independently before interacting.')}`;
+}
+
+function renderBulkResults(d){
+    document.getElementById('riskReason').innerHTML='';
+    document.getElementById('scannedUrlDisplay').innerText=`${d.scanned} link(s) scanned`;
+    const worst=d.results[0];
+    if(worst){
+        document.getElementById('riskScore').innerHTML=`${worst.score}<span style="font-size:20px;color:var(--text-muted);">/100 Highest Risk</span>`;
+        document.getElementById('riskScore').style.color=riskColor(worst.score);
+        const label=document.getElementById('riskLabel');label.innerText=riskIcon(worst.danger,worst.score)+worst.danger;label.style.color=riskColor(worst.score);
+    }
+    const wrap=document.getElementById('bulkResultsWrap');wrap.style.display='block';
+    document.getElementById('bulkCount').innerText=d.scanned;
+    document.getElementById('bulkResultsList').innerHTML=d.results.map(r=>`<div class="history-item"><div class="history-item-top"><b style="word-break:break-word;flex:1;">${escapeHtml(r.url)}</b><span class="history-score" style="color:${riskColor(r.score)}">${r.score}/100 · ${escapeHtml(r.danger)}</span></div><p class="muted" style="margin-top:8px;">${escapeHtml(r.summary)}</p></div>`).join('')
+        + (d.skipped&&d.skipped.length?`<div class="history-item"><b>Skipped (not a valid http/https URL):</b><p class="muted" style="margin-top:8px;word-break:break-word;">${d.skipped.map(escapeHtml).join(', ')}</p></div>`:'');
+}
+
+async function runRealScan(type){
+    const authVisible=document.getElementById('authButtons').style.display!=='none';
+    if(authVisible){openModal('login');return;}
+    const button=event?.currentTarget;if(button){button.disabled=true;button.innerText='⏳ Analyzing...';}
+
+    if(type==='url'){
+        const raw=document.getElementById('scanInput').value.trim();
+        const lines=raw.split(/[\r\n]+/).map(s=>s.trim()).filter(Boolean);
+        try{
+            if(lines.length>1){
+                const r=await fetch('/api/scan/bulk',{method:'POST',headers:csrfHeaders({'Content-Type':'application/json'}),body:JSON.stringify({urls:raw})});
+                const d=await r.json();
+                if(!r.ok){alert(d.error||'Bulk scan failed.');return;}
+                renderBulkResults(d);loadHistory();
+            }else{
+                const fd=new FormData();fd.append('scan_type','url');fd.append('value',lines[0]||'');
+                const r=await fetch('/api/scan',{method:'POST',headers:csrfHeaders(),body:fd});
+                const d=await r.json();
+                if(!r.ok){alert(d.error||'Scan failed.');return;}
+                renderSingleResult(d);loadHistory();
+            }
+        }catch(e){alert('Server error. Make sure Flask is running.');}
+        finally{if(button){button.disabled=false;button.innerText='🔍 Analyze URL';}}
+        return;
+    }
+
+    const fd=new FormData();fd.append('scan_type',type);
+    if(type==='email')fd.append('value',document.getElementById('emailInput').value.trim());
+    if(type==='file'){const f=document.getElementById('fileInput').files[0];if(!f){alert('Please choose a file first.');if(button){button.disabled=false;button.innerText='🛡️ Analyze File';}return;}fd.append('file',f);}
+    try{
+        const r=await fetch('/api/scan',{method:'POST',headers:csrfHeaders(),body:fd});
+        const d=await r.json();
+        if(!r.ok){alert(d.error||'Scan failed.');return;}
+        renderSingleResult(d);loadHistory();
+    }catch(e){alert('Server error. Make sure Flask is running.');}
+    finally{if(button){button.disabled=false;button.innerText=type==='email'?'🧠 Analyze Email':'🛡️ Analyze File';}}
+}
+function toggleFaq(element){const item=element.parentElement;item.classList.toggle('active');}
+
+document.addEventListener('click',e=>{const menu=document.getElementById('profileMenu');if(menu&&!menu.contains(e.target))document.getElementById('dropdownApp').classList.remove('active');});
+// Connect existing profile dropdown links to real account panels.
+document.addEventListener('DOMContentLoaded',async()=>{const links=document.querySelectorAll('#dropdownApp a');if(links[0])links[0].onclick=e=>{e.preventDefault();openDashboard()};if(links[1])links[1].onclick=e=>{e.preventDefault();location.hash='scan';document.getElementById('dropdownApp').classList.remove('active')};if(links[2])links[2].onclick=e=>{e.preventDefault();openHistory()};if(links[3])links[3].onclick=e=>{e.preventDefault();openSettings()};await loadCsrfToken();loadMe();});
+
+const canvas = document.getElementById('particles-canvas');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+const particles = [];
+for(let i = 0; i < 40; i++) {
+    particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 0.8,
+        vy: (Math.random() - 0.5) * 0.8,
+        radius: Math.random() * 2 + 1
+    });
+}
+
+function animateParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const particleColor = getComputedStyle(document.documentElement).getPropertyValue('--particle-color').trim();
+    const lineColor = getComputedStyle(document.documentElement).getPropertyValue('--particle-line').trim();
+
+    particles.forEach((p, index) => {
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = particleColor;
+        ctx.fill();
+
+        for (let j = index + 1; j < particles.length; j++) {
+            const p2 = particles[j];
+            const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+            if (dist < 120) {
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.strokeStyle = lineColor;
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
+        }
+    });
+    requestAnimationFrame(animateParticles);
+}
+animateParticles();
+</script>
+</body>
+</html>
